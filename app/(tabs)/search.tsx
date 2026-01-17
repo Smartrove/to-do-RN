@@ -3,11 +3,12 @@ import SearchBar from "@/components/serachbar";
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
 import { fetchPopularMovies } from "@/services/api";
+import { updateSearch } from "@/services/appwrite";
 import useFetch from "@/services/useFetch";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Image, Text, View } from "react-native";
 
-const search = () => {
+const Search = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const {
     data: movies,
@@ -29,6 +30,7 @@ const search = () => {
   //   func();
   // }, [searchQuery]);
 
+  // First useEffect: Handle search
   useEffect(() => {
     const timeOutId = setTimeout(async () => {
       if (searchQuery.trim()) {
@@ -40,6 +42,25 @@ const search = () => {
 
     return () => clearTimeout(timeOutId);
   }, [searchQuery]);
+
+  // Second useEffect: Update database when movies change
+  useEffect(() => {
+    const updateDatabase = async () => {
+      if (
+        searchQuery.trim() &&
+        movies?.results?.length > 0 &&
+        movies?.results[0]
+      ) {
+        try {
+          await updateSearch(searchQuery, movies.results[0]);
+        } catch (err) {
+          console.error("Failed to update search:", err);
+        }
+      }
+    };
+
+    updateDatabase();
+  }, [movies]); // Trigger when movies data changes
 
   return (
     <View className="flex-1 bg-primary">
@@ -122,4 +143,4 @@ const search = () => {
   );
 };
 
-export default search;
+export default Search;

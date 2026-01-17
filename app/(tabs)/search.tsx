@@ -15,18 +15,30 @@ const search = () => {
     error: moviesError,
     refetch: reloadMovies,
     reset,
-  } = useFetch(() => fetchPopularMovies({ query: searchQuery }));
+  } = useFetch(() => fetchPopularMovies({ query: searchQuery }), false);
+
+  // useEffect(() => {
+  //   const func = async () => {
+  //     if (searchQuery.trim()) {
+  //       await reloadMovies();
+  //     } else {
+  //       reset();
+  //     }
+  //   };
+
+  //   func();
+  // }, [searchQuery]);
 
   useEffect(() => {
-    const func = async () => {
+    const timeOutId = setTimeout(async () => {
       if (searchQuery.trim()) {
         await reloadMovies();
       } else {
-        reset;
+        reset();
       }
+    }, 500);
 
-      func();
-    };
+    return () => clearTimeout(timeOutId);
   }, [searchQuery]);
 
   return (
@@ -95,6 +107,16 @@ const search = () => {
           </>
         }
         scrollEnabled={false}
+        ListEmptyComponent={
+          !moviesLoading && !moviesError ? (
+            <View className="mt-10 px-5">
+              <Text className="text-center text-gray-500">
+                {" "}
+                {searchQuery.trim() ? "No movies found" : "Search for a movie"}
+              </Text>
+            </View>
+          ) : null
+        }
       />
     </View>
   );
